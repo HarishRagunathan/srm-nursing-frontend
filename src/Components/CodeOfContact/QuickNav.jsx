@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import { FaShieldAlt, FaUserGraduate, FaTshirt, FaBan, FaRegBuilding, FaChalkboardTeacher, FaTools, FaHome } from 'react-icons/fa';
 
 const tabs = [
@@ -12,56 +13,80 @@ const tabs = [
 ];
 
 export default function QuickNav({ sections = [] }) {
+  const navRef = useRef(null);
+  const [active, setActive] = useState('');
+  const visibleTabs = tabs.filter(tab => sections.some(section => '#' + section.id === tab.href)
+    && (tab.href !== '#disciplinary-committee' || sections.some(section => section.id === 'general-rules')));
+  const sectionKey = visibleTabs.map(tab => tab.href.slice(1)).join(',');
+
+  useEffect(() => {
+    const elements = sectionKey.split(',').map(id => document.getElementById(id)).filter(Boolean);
+    if (!elements.length) return;
+    let frame;
+    const previousMargins = elements.map(element => element.style.scrollMarginTop);
+    const offset = () => 68 + (navRef.current?.offsetHeight || 0) + 16;
+    const update = () => {
+      frame = undefined;
+      const line = offset();
+      let current = elements[0];
+      for (const element of elements) {
+        if (element.getBoundingClientRect().top <= line + 2) current = element;
+      }
+      setActive('#' + current.id);
+    };
+    const schedule = () => { if (frame === undefined) frame = requestAnimationFrame(update); };
+    const resize = () => {
+      elements.forEach(element => { element.style.scrollMarginTop = offset() + 'px'; });
+      schedule();
+    };
+    const goToHash = () => {
+      const target = elements.find(element => '#' + element.id === window.location.hash);
+      if (target) target.scrollIntoView({ block: 'start', behavior: 'instant' });
+      schedule();
+    };
+    resize();
+    goToHash();
+    const observer = new ResizeObserver(resize);
+    if (navRef.current) observer.observe(navRef.current);
+    elements.forEach(element => observer.observe(element));
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', resize);
+    window.addEventListener('hashchange', goToHash);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+      window.removeEventListener('scroll', schedule);
+      window.removeEventListener('resize', resize);
+      window.removeEventListener('hashchange', goToHash);
+      elements.forEach((element, index) => { element.style.scrollMarginTop = previousMargins[index]; });
+    };
+  }, [sectionKey]);
+
+  useEffect(() => {
+    const link = navRef.current?.querySelector('[aria-current="location"]');
+    const scroller = link?.parentElement;
+    if (!link || !scroller) return;
+    const linkRect = link.getBoundingClientRect();
+    const scrollRect = scroller.getBoundingClientRect();
+    if (linkRect.left < scrollRect.left || linkRect.right > scrollRect.right) {
+      scroller.scrollLeft += linkRect.left - scrollRect.left - (scrollRect.width - linkRect.width) / 2;
+    }
+  }, [active]);
+
   return (
-    <div style={{
-      background: 'white',
-      borderBottom: '1.5px solid var(--light-gray)',
-      position: 'sticky',
-      top: '68px',
-      zIndex: 900,
-      boxShadow: '0 4px 20px rgba(75,46,131,0.08)',
-    }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 clamp(16px, 4vw, 44px)' }}>
+    <nav ref={navRef} className="coc-quicknav" aria-label="Code of conduct sections">
+      <div className="coc-quicknav__container">
         <div className="quicknav-scroll">
-          {tabs.filter(tab => sections.some(section => '#' + section.id === tab.href)).map((t, i) => (
-            <a
-              key={i}
-              href={t.href}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: 5,
-                padding: 'clamp(12px, 1.8vw, 17px) clamp(14px, 2.5vw, 26px)',
-                textDecoration: 'none',
-                color: 'var(--text-light)',
-                fontSize: 'clamp(10.5px, 1.2vw, 12px)',
-                fontFamily: 'var(--font-display)',
-                fontWeight: 700,
-                letterSpacing: '0.3px',
-                borderBottom: '3px solid transparent',
-                transition: 'var(--transition)',
-                flex: '1 0 auto',
-                minWidth: 'fit-content',
-                whiteSpace: 'nowrap',
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.color = 'var(--primary)';
-                e.currentTarget.style.borderBottomColor = 'var(--primary)';
-                e.currentTarget.style.background = 'rgba(75,46,131,0.04)';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.color = 'var(--text-light)';
-                e.currentTarget.style.borderBottomColor = 'transparent';
-                e.currentTarget.style.background = 'transparent';
-              }}
-            >
-              <span style={{ fontSize: 'clamp(16px, 2vw, 20px)' }}>{t.icon}</span>
-              {t.label}
+          {visibleTabs.map(tab => (
+            <a key={tab.href} href={tab.href}
+              className={'coc-quicknav__link' + (active === tab.href ? ' is-active' : '')}
+              aria-current={active === tab.href ? 'location' : undefined}>
+              <span className="coc-quicknav__icon" aria-hidden="true">{tab.icon}</span>
+              {tab.label}
             </a>
           ))}
         </div>
       </div>
-    </div>
+    </nav>
   );
 }
