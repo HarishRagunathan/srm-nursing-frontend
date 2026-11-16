@@ -1,18 +1,10 @@
 import React from 'react';
-import { FaArrowRight } from 'react-icons/fa';
-import Img1 from '../../assets/images/GreenCampus/Gallery/1.jpg'
-import Img2 from '../../assets/images/GreenCampus/Gallery/2.jpg'
-import Img3 from '../../assets/images/GreenCampus/Gallery/3.jpg'
-import Img4 from '../../assets/images/GreenCampus/Gallery/4.jpg'
 
-const IMAGES = [
-  { src: Img1, alt: 'Campus greenery and tree-lined road' },
-  { src: Img2, alt: 'Waste segregation bins close-up' },
-  { src: Img3, alt: 'Solar panels on rooftop' },
-  { src: Img4, alt: 'Students on a cleanliness drive' },
-];
+const API_URL = import.meta.env.VITE_BACKEND_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-const GreenCampusGallery = () => {
+const GreenCampusGallery = ({ gallery = [] }) => {
+  if (!gallery || gallery.length === 0) return null;
+
   return (
     <section className="gc-gallery">
       <div className="green-campus-container">
@@ -23,12 +15,21 @@ const GreenCampusGallery = () => {
               Green Campus, Captured
             </h2>
           </div>
-          
         </div>
         <div className="gc-gallery-grid">
-          {IMAGES.map((img, i) => (
-            <img key={i} src={img.src} alt={img.alt} loading="lazy" />
-          ))}
+          {gallery.map((img, i) => {
+            const imgSrc = img.image
+              ? (img.image.startsWith('http') ? img.image : `${API_URL}/uploads/${img.image}`)
+              : '';
+            return (
+              <img
+                key={img._id || i}
+                src={imgSrc}
+                alt={img.alt || img.title || 'Green Campus'}
+                loading="lazy"
+              />
+            );
+          })}
         </div>
       </div>
     </section>

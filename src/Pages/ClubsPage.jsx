@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   BookOpen,
   Languages,
@@ -13,27 +13,15 @@ import {
   Check,
   Target,
   Crosshair,
+  Loader2,
 } from 'lucide-react';
-import clubsData from '../Data/clubs';
 import '../Styles/ClubsPage.css';
-
-// Club images
-import BookClubImg from '../assets/images/Clubs/book-club.jpg';
-import LinguisticImg from '../assets/images/Clubs/linguistic-club.jpg';
-import JournalImg from '../assets/images/Clubs/journal-club.png';
-import SNAImg from '../assets/images/Clubs/sna.jpg';
-import CulturalImg from '../assets/images/Clubs/cultural-club.png';
-import WomenEmpImg from '../assets/images/Clubs/women-empowerment.png';
-import WellnessImg from '../assets/images/Clubs/student-wellness-club.png';
-import YRCImg from '../assets/images/Clubs/yrc.png';
-import AntiRaggingImg from '../assets/images/Clubs/anti-ragging.png';
-import SDGImg from '../assets/images/Clubs/sdg.png';
 import Breadcrum from '../Components/Common/Breadcrum';
 import AssoYRC from '../Components/Association/AssoYRC';
-import IQAC from '../assets/images/Clubs/iqac.png';
-import ICC from '../assets/images/Clubs/internal-complaints-committee.png';
 
-// Maps the "icon" string in clubs.json to an actual icon component.
+const API_URL = import.meta.env.VITE_BACKEND_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+// Maps the "icon" string from DB to an icon component
 const ICONS = {
   'book-open': BookOpen,
   languages: Languages,
@@ -47,31 +35,37 @@ const ICONS = {
   globe: Globe,
 };
 
-// Maps club ID to its image
-const CLUB_IMAGES = {
-  'book-club': BookClubImg,
-  'linguistic-club': LinguisticImg,
-  'journal-club': JournalImg,
-  'student-nurses-association': SNAImg,
-  'cultural-club': CulturalImg,
-  'women-empowerment-club': WomenEmpImg,
-  'student-wellness-club': WellnessImg,
-  'Youth Red Cross (YRC) Club': YRCImg,
-  'Anti-Ragging Committee': AntiRaggingImg,
-  'Sustainable Development Goals (SDG) Cell': SDGImg,
-  'Internal Quality Assurance Cell (IQAC)': IQAC,
-  'Internal Complaints Committee (ICC)': ICC,
-};
+function getClubImageUrl(coverImage) {
+  if (!coverImage) return '';
+  if (coverImage.startsWith('http://') || coverImage.startsWith('https://') || coverImage.startsWith('data:')) {
+    return coverImage;
+  }
+  return `${API_URL}/uploads/${coverImage}`;
+}
 
 function ClubSection({ club, index }) {
-  const Icon = ICONS[club.icon] || BookOpen;
+  const Icon = ICONS[club.icon] || Stethoscope;
   const isEven = index % 2 === 0;
-  const clubImage = CLUB_IMAGES[club.id];
+  const codeDisplay = club.code || String(index + 1).padStart(2, '0');
+  const imageUrl = getClubImageUrl(club.coverImage);
+
+  // Aim points (split by sentences if string)
+  const aimPoints = typeof club.aim === 'string'
+    ? club.aim.split(/(?<=\.)\s+/).filter((s) => s.trim().length > 0)
+    : Array.isArray(club.aim)
+      ? club.aim
+      : [];
+
+  const objectivesList = Array.isArray(club.objectives)
+    ? club.objectives
+    : typeof club.objectives === 'string'
+      ? club.objectives.split('\n').filter(Boolean)
+      : [];
 
   return (
-    <section className={`club-section ${isEven ? 'club-section--left' : 'club-section--right'}`} data-color={club.color}>
+    <section className={`club-section ${isEven ? 'club-section--left' : 'club-section--right'}`} data-color={club.color || 'accent'}>
       {/* Decorative background number */}
-      <span className="club-section__bg-number" aria-hidden="true">{club.code}</span>
+      <span className="club-section__bg-number" aria-hidden="true">{codeDisplay}</span>
 
       <div className="club-section__container">
         {/* Section Header */}
@@ -80,71 +74,87 @@ function ClubSection({ club, index }) {
             <Icon size={28} strokeWidth={2} />
           </div>
           <div className="club-section__title-group">
-            <span className="club-section__eyebrow">Club {club.code}</span>
+            <span className="club-section__eyebrow">Club {codeDisplay}</span>
             <h2 className="club-section__name">{club.name}</h2>
-            <p className="club-section__tagline">{club.tagline}</p>
+            {club.tagline && <p className="club-section__tagline">{club.tagline}</p>}
           </div>
         </div>
 
         {/* Content Grid: Image + Aim + Objectives */}
         <div className="club-section__content">
-          {/* Club Image */}
+          {/* Club Image from Backend */}
           <div className="club-section__image-card">
             <div className="club-section__image-wrap">
-              <img
-                src={clubImage}
-                alt={club.name}
-                className="club-section__image"
-                loading="lazy"
-              />
+              {imageUrl ? (
+                <img
+                  src={imageUrl}
+                  alt={club.name}
+                  className="club-section__image"
+                  loading="lazy"
+                />
+              ) : (
+                <div style={{
+                  width: '100%',
+                  height: '100%',
+                  minHeight: '260px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: '#f1f5f9',
+                  color: '#94a3b8'
+                }}>
+                  <Icon size={48} strokeWidth={1.5} />
+                </div>
+              )}
               <div className="club-section__image-overlay">
                 <Icon size={32} strokeWidth={1.5} />
               </div>
             </div>
             <div className="club-section__image-caption">
-              <span>{club.shortName}</span>
+              <span>{club.shortName || club.name}</span>
             </div>
           </div>
 
           {/* Details Column: Aim + Objectives stacked */}
           <div className="club-section__details">
             {/* AIM Card */}
-            <div className="club-section__aim-card">
-              <div className="club-section__card-label">
-                <Target size={16} strokeWidth={2.5} />
-                <span>Aim</span>
-              </div>
-              <ul className="club-section__aim-list">
-                {club.aim
-                  .split(/(?<=\.)\s+/)
-                  .filter((s) => s.trim().length > 0)
-                  .map((point, i) => (
+            {aimPoints.length > 0 && (
+              <div className="club-section__aim-card">
+                <div className="club-section__card-label">
+                  <Target size={16} strokeWidth={2.5} />
+                  <span>Aim</span>
+                </div>
+                <ul className="club-section__aim-list">
+                  {aimPoints.map((point, i) => (
                     <li key={i}>
                       <span className="club-section__aim-bullet" aria-hidden="true" />
-                      <span>{point.trim()}</span>
+                      <span>{typeof point === 'string' ? point.trim() : JSON.stringify(point)}</span>
                     </li>
                   ))}
-              </ul>
-            </div>
+                </ul>
+              </div>
+            )}
 
             {/* OBJECTIVES Card */}
-            <div className="club-section__obj-card">
-              <div className="club-section__card-label">
-                <Crosshair size={16} strokeWidth={2.5} />
-                <span>Objectives</span>
+            {objectivesList.length > 0 && (
+              <div className="club-section__obj-card">
+                <div className="club-section__card-label">
+                  <Crosshair size={16} strokeWidth={2.5} />
+                  <span>Objectives</span>
+                </div>
+                <ol className="club-section__obj-list">
+                  {objectivesList.map((objective, i) => (
+                    <li key={i}>
+                      <span className="club-section__obj-num">{String(i + 1).padStart(2, '0')}</span>
+                      <span className="club-section__obj-text">
+                        <Check size={14} strokeWidth={3} className="club-section__check-icon" />
+                        {typeof objective === 'string' ? objective : objective.desc || objective.title || JSON.stringify(objective)}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
               </div>
-              <ol className="club-section__obj-list">
-                {club.objectives.map((objective, i) => (
-                  <li key={i}>
-                    <span className="club-section__obj-num">{String(i + 1).padStart(2, '0')}</span>
-                    <span className="club-section__obj-text">
-                      <Check size={14} strokeWidth={3} className="club-section__check-icon" />
-                      {objective}
-                    </span>
-                  </li>
-                ))}
-              </ol>
-            </div>
+            )}
           </div>
         </div>
       </div>
@@ -153,11 +163,45 @@ function ClubSection({ club, index }) {
 }
 
 export default function ClubsPage() {
+  const [clubs, setClubs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchClubs = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/clubs?status=active`);
+        if (!res.ok) {
+          throw new Error(`Failed to fetch clubs (${res.status})`);
+        }
+        const json = await res.json();
+        if (isMounted) {
+          setClubs(Array.isArray(json.clubs) ? json.clubs : []);
+          setError(null);
+        }
+      } catch (err) {
+        console.error('Error fetching clubs from backend:', err);
+        if (isMounted) {
+          setError(err.message);
+        }
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    fetchClubs();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   return (
     <div className="clubs-page">
       {/* ───── Hero ───── */}
       <Breadcrum title="Clubs" />
-
 
       {/* ───── Intro ───── */}
       <section className="clubs-intro">
@@ -170,12 +214,27 @@ export default function ClubsPage() {
         </p>
       </section>
 
-      {/* ───── One section per club ───── */}
-      {clubsData.map((club, index) => (
-        <ClubSection key={club.id} club={club} index={index} />
-      ))}
+      {/* ───── Dynamic Clubs List from Backend & Database Only ───── */}
+      {loading ? (
+        <div style={{ textAlign: 'center', padding: '60px 20px', color: '#64748b' }}>
+          <Loader2 className="animate-spin" size={36} style={{ margin: '0 auto 12px', display: 'block', animation: 'spin 1s linear infinite' }} />
+          <p style={{ fontSize: '15px' }}>Loading clubs...</p>
+        </div>
+      ) : error ? (
+        <div style={{ textAlign: 'center', padding: '40px 20px', color: '#dc2626' }}>
+          <p>Failed to load clubs. Please verify the backend service is running.</p>
+        </div>
+      ) : clubs.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '60px 20px', color: '#64748b' }}>
+          <p>No clubs are currently available.</p>
+        </div>
+      ) : (
+        clubs.map((club, index) => (
+          <ClubSection key={club._id || club.slug || index} club={club} index={index} />
+        ))
+      )}
 
-      <AssoYRC/>
+      <AssoYRC />
     </div>
   );
 }

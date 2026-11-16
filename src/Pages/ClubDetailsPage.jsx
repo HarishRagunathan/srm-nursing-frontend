@@ -1,14 +1,7 @@
-// ClubDetailsPage.jsx  — mount this at route /clubs/:slug
-// e.g. with React Router v6:
-//   <Route path="/clubs/:slug" element={<ClubDetailsPage />} />
-//
-// If you don't have React Router, pass slug as a prop:
-//   <ClubDetailsPage slug="nursing-excellence-club" />
-
 import { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import { FaExclamationTriangle, FaArrowLeft } from 'react-icons/fa';
 
-import clubsData from '../Data/clubs.json';
 import ClubOverview from '../Components/ClubDetails/ClubOverview';
 import ClubAim from '../Components/ClubDetails/ClubAim';
 import ClubObjectives from '../Components/ClubDetails/ClubObjectives';
@@ -16,39 +9,115 @@ import ClubActivities from '../Components/ClubDetails/ClubActivities';
 import '../Styles/ClubDetails.css';
 import Breadcrum from '../Components/Common/Breadcrum';
 
-// ── Tiny hook: reads :slug from React Router OR falls back to prop / URL hash ──
-function useSlug(propSlug) {
-  // Try React Router (v6) if available
-  try {
-    // Dynamic import attempt — works when react-router-dom is present
-    // eslint-disable-next-line
-    const { useParams } = require('react-router-dom');
-    const { slug } = useParams();
-    return slug || propSlug;
-  } catch {
-    // Fallback: read from window.location.pathname last segment
-    if (typeof window !== 'undefined') {
-      const parts = window.location.pathname.split('/').filter(Boolean);
-      const fromPath = parts[parts.length - 1];
-      if (fromPath && fromPath !== 'clubs') return fromPath;
-    }
-    return propSlug;
+const API_URL = import.meta.env.VITE_BACKEND_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+function formatClubFromDb(club) {
+  if (!club) return null;
+
+  const clubName = club.name || 'Club';
+  const coverImage = club.coverImage
+    ? (club.coverImage.startsWith('http') ? club.coverImage : `${API_URL}/uploads/${club.coverImage}`)
+    : '';
+
+  // Overview
+  const overview = typeof club.overview === 'object' && club.overview !== null
+    ? club.overview
+    : {
+        title: club.tagline || `About ${clubName}`,
+        description: typeof club.overview === 'string' && club.overview
+          ? club.overview
+          : typeof club.aim === 'string' ? club.aim : `Information regarding ${clubName} at SRM College of Nursing.`,
+        image: coverImage,
+        highlights: [
+          { icon: 'FaCalendarAlt', value: club.code || 'Active', label: 'Club Code' },
+          { icon: 'FaUsers', value: club.category ? club.category.toUpperCase() : 'General', label: 'Category' },
+          { icon: 'FaStar', value: 'SRM', label: 'College of Nursing' },
+          { icon: 'FaHeartbeat', value: 'Active', label: 'Charter' }
+        ]
+      };
+
+  // Aim
+  const aim = typeof club.aim === 'object' && club.aim !== null && club.aim.statement
+    ? club.aim
+    : {
+        statement: typeof club.aim === 'string' && club.aim ? club.aim : 'Aim and goals are defined in the club charter.',
+        image: coverImage,
+        pillars: [
+          { icon: 'FaHeartbeat', title: 'Professional Excellence', desc: 'Upholding highest nursing standards.' },
+          { icon: 'FaBookOpen', title: 'Academic & Skill Development', desc: 'Promoting continuous learning and practice.' },
+          { icon: 'FaHandsHelping', title: 'Community & Service', desc: 'Dedicated to community welfare and patient care.' },
+          { icon: 'FaLightbulb', title: 'Leadership & Integrity', desc: 'Fostering ethical conduct and leadership.' }
+        ]
+      };
+
+  // Objectives
+  let objectives = [];
+  if (Array.isArray(club.objectives)) {
+    objectives = club.objectives.map((obj, i) => {
+      if (typeof obj === 'string') {
+        return {
+          icon: 'FaBullseye',
+          title: `Objective ${i + 1}`,
+          desc: obj
+        };
+      }
+      return obj;
+    });
   }
+
+  // Activities
+  const activities = Array.isArray(club.activities) ? club.activities : [];
+
+  return {
+    ...club,
+    name: clubName,
+    overview,
+    aim,
+    objectives,
+    activities
+  };
 }
 
 export default function ClubDetailsPage({ slug: propSlug }) {
-  const slug = useSlug(propSlug);
+  const params = useParams();
+  const slug = propSlug || params.slug;
   const [club, setClub] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate async data fetch (swap for real API call if needed)
-    const timer = setTimeout(() => {
-      const found = clubsData.find((c) => c.slug === slug);
-      setClub(found || null);
-      setLoading(false);
-    }, 300);
-    return () => clearTimeout(timer);
+    let isMounted = true;
+
+    const fetchClub = async () => {
+      if (!slug) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_URL}/api/clubs/${slug}`);
+        if (res.ok) {
+          const json = await res.json();
+          if (isMounted && json && json.club) {
+            setClub(formatClubFromDb(json.club));
+            setLoading(false);
+            return;
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch club from backend:', err);
+      }
+
+      if (isMounted) {
+        setClub(null);
+        setLoading(false);
+      }
+    };
+
+    fetchClub();
+
+    return () => {
+      isMounted = false;
+    };
   }, [slug]);
 
   if (loading) {
@@ -68,11 +137,11 @@ export default function ClubDetailsPage({ slug: propSlug }) {
           </div>
           <h2 className="club-details-notfound__title">Club Not Found</h2>
           <p className="club-details-notfound__desc">
-            We couldn't find a club with the slug <strong>"{slug}"</strong>. Please check the URL or go back to the clubs listing.
+            We couldn't find a club with the identifier <strong>"{slug}"</strong> in the database. Please check the URL or return to the clubs list.
           </p>
-          <a href="/clubs" className="club-details-notfound__btn">
+          <Link to="/clubs" className="club-details-notfound__btn">
             <FaArrowLeft /> Back to Clubs
-          </a>
+          </Link>
         </div>
       </div>
     );
@@ -81,18 +150,10 @@ export default function ClubDetailsPage({ slug: propSlug }) {
   return (
     <main>
       <Breadcrum title={club.name} />
-
-      {/* 3. Overview */}
       <ClubOverview overview={club.overview} clubName={club.name} />
-
-      {/* 4. Aim */}
       <ClubAim aim={club.aim} />
-
-      {/* 5. Objectives */}
-      <ClubObjectives objectives={club.objectives} />
-
-      {/* 6. Activities */}
-      <ClubActivities activities={club.activities} />
+      {club.objectives.length > 0 && <ClubObjectives objectives={club.objectives} />}
+      {club.activities.length > 0 && <ClubActivities activities={club.activities} />}
     </main>
   );
 }

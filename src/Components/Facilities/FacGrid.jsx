@@ -1,95 +1,62 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  FiMonitor, FiUsers, FiBook, FiActivity,
-  FiZap, FiMusic, FiTruck, FiHome, FiCoffee,
-  FiArrowRight
+  FiMonitor,
+  FiUsers,
+  FiBook,
+  FiActivity,
+  FiZap,
+  FiMusic,
+  FiTruck,
+  FiHome,
+  FiCoffee,
+  FiWifi,
+  FiShield,
+  FiHeart,
 } from 'react-icons/fi';
-import Img1 from "../../assets/images/Facilities/1.jpg"
-import Img2 from "../../assets/images/Facilities/2.jpg"
-import Img3 from "../../assets/images/Facilities/3.jpg"
-import Img4 from "../../assets/images/Facilities/4.jpg"
-import Img5 from "../../assets/images/Facilities/5.jpg"
-import Img6 from "../../assets/images/Facilities/6.png"
-import Img7 from "../../assets/images/Facilities/7.jpg"
-import Img8 from "../../assets/images/Facilities/8.jpg"
-import Img9 from "../../assets/images/Facilities/9.jpg"
 
-const facilities = [
-  {
-    tag: 'Academic',
-    icon: <FiMonitor />,
-    title: 'Smart Class Rooms',
-    desc: 'Well-designed, spacious, ventilated classrooms equipped with smart boards, LCD projectors, and audio-visual systems. High-speed internet access ensures engaging, tech-enriched learning.',
-    img: Img1,
-    features: ['Smart Boards', 'LCD Projectors', 'AV Systems', 'Hi-Speed WiFi'],
-  },
-  {
-    tag: 'Events',
-    icon: <FiUsers />,
-    title: 'Multi Purpose Hall',
-    desc: 'A versatile central facility designed to host academic seminars, cultural events, and co-curricular activities. Serves as the vibrant hub for interaction, learning, and celebrations.',
-    img: Img2,
-    features: ['Seminars', 'Cultural Events', 'Auditorium', 'Stage Setup'],
-  },
-  {
-    tag: 'Knowledge',
-    icon: <FiBook />,
-    title: 'Digital Library',
-    desc: 'A comprehensive knowledge hub with books, journals, and digital resources. Internet-enabled systems support research, innovation, and continuous learning for students and faculty.',
-    img: Img3,
-    features: ['Digital Journals', 'E-Resources', 'Research Tools', 'Reading Zones'],
-  },
-  {
-    tag: 'Clinical',
-    icon: <FiActivity />,
-    title: 'Laboratory Facilities',
-    desc: 'Modern, well-equipped laboratories provide hands-on experience and practical exposure. Students master theoretical concepts through real clinical simulations and skill-building exercises.',
-    img: Img4,
-    features: ['Anatomy Lab', 'Nursing Skills Lab', 'Simulation Room', 'OBG Lab'],
-  },
-  {
-    tag: 'Wellness',
-    icon: <FiZap />,
-    title: 'Sports & Athletics',
-    desc: 'Sports and physical education promote discipline, teamwork, leadership, and a healthy lifestyle. Students participate in inter-college tournaments and fitness programs year-round.',
-    img: Img5,
-    features: ['Outdoor Courts', 'Indoor Games', 'Fitness Zone', 'Tournaments'],
-  },
-  {
-    tag: 'Culture',
-    icon: <FiMusic />,
-    title: 'Cultural Programs',
-    desc: 'Rich cultural programs provide opportunities to explore creativity, showcase talents, and celebrate diversity. A vibrant campus life that enriches the overall student experience.',
-    img: Img6,
-    features: ['Dance & Music', 'Art Programs', 'Festivals', 'Talent Shows'],
-  },
-  {
-    tag: 'Commute',
-    icon: <FiTruck />,
-    title: 'Transport Services',
-    desc: 'Safe and reliable transport services ensure hassle-free commuting with well-planned routes, stops, and schedules for students and staff. GPS-enabled fleet for your security.',
-    img: Img7,
-    features: ['GPS Enabled', 'Multiple Routes', 'Safe Commute'],
-  },
-  {
-    tag: 'Residence',
-    icon: <FiHome />,
-    title: 'Hostel Accommodation',
-    desc: 'Comfortable and secure hostel facilities provide a safe, supportive home away from home. Separate hostels for boys and girls with wardens, recreational areas, and all amenities.',
-    img: Img8,
-    features: ['Boys & Girls Hostels', 'Common Rooms', 'In-house Dining', 'Security'],
-  },
-  {
-    tag: 'Dining',
-    icon: <FiCoffee />,
-    title: 'Campus Canteen',
-    desc: 'A vibrant canteen offering hygienic and affordable food where students and staff can relax and socialize. Nutritious meals and a warm atmosphere fuel productive minds.',
-    img: Img9,
-    features: ['Hygienic Food', 'Affordable Pricing', 'Nutritious Menu', 'Social Space'],
-  },
-];
+const API_URL = import.meta.env.VITE_BACKEND_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+const ICON_MAP = {
+  FiMonitor: <FiMonitor />,
+  FiUsers: <FiUsers />,
+  FiBook: <FiBook />,
+  FiActivity: <FiActivity />,
+  FiZap: <FiZap />,
+  FiMusic: <FiMusic />,
+  FiTruck: <FiTruck />,
+  FiHome: <FiHome />,
+  FiCoffee: <FiCoffee />,
+  FiWifi: <FiWifi />,
+  FiShield: <FiShield />,
+  FiHeart: <FiHeart />,
+};
 
 const FacGrid = () => {
+  const [facilities, setFacilities] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchFacilities = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/facilities?status=active`);
+        if (!res.ok) throw new Error('Failed to fetch facilities');
+        const data = await res.json();
+        setFacilities(data.facilities || []);
+      } catch (err) {
+        console.error('Error loading facilities:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFacilities();
+  }, []);
+
+  const getImageUrl = (img) => {
+    if (!img) return '';
+    return img.startsWith('http') ? img : `${API_URL}/uploads/${img}`;
+  };
+
   return (
     <section className="fac-grid">
       <div className="fac-grid__inner">
@@ -102,28 +69,49 @@ const FacGrid = () => {
           </p>
         </div>
 
-        <div className="fac-grid__list">
-          {facilities.map((fac, i) => (
-            <div className="fac-card" key={i}>
-              <div className="fac-card__image-wrap">
-                <img src={fac.img} alt={fac.title} />
-                <div className="fac-card__overlay" />
-                <span className="fac-card__tag">{fac.tag}</span>
-                {/* <div className="fac-card__icon-badge">{fac.icon}</div> */}
-              </div>
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '60px 0', color: '#64748b' }}>
+            Loading campus facilities...
+          </div>
+        ) : facilities.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '60px 0', color: '#64748b' }}>
+            No facilities available at the moment.
+          </div>
+        ) : (
+          <div className="fac-grid__list">
+            {facilities.map((fac, i) => {
+              const iconElement = ICON_MAP[fac.icon] || <FiMonitor />;
+              const imgSrc = getImageUrl(fac.img);
 
-              <div className="fac-card__body">
-                <h3 className="fac-card__title"><span className='fac-card__icon-badge'>{fac.icon}</span>{fac.title}</h3>
-                <p className="fac-card__desc">{fac.desc}</p>
-                <div className="fac-card__features">
-                  {fac.features.map((f, j) => (
-                    <span className="fac-card__feature-tag" key={j}>{f}</span>
-                  ))}
+              return (
+                <div className="fac-card" key={fac._id || i}>
+                  <div className="fac-card__image-wrap">
+                    {imgSrc && <img src={imgSrc} alt={fac.title} />}
+                    <div className="fac-card__overlay" />
+                    <span className="fac-card__tag">{fac.tag}</span>
+                  </div>
+
+                  <div className="fac-card__body">
+                    <h3 className="fac-card__title">
+                      <span className="fac-card__icon-badge">{iconElement}</span>
+                      {fac.title}
+                    </h3>
+                    <p className="fac-card__desc">{fac.desc}</p>
+                    {fac.features && fac.features.length > 0 && (
+                      <div className="fac-card__features">
+                        {fac.features.map((f, j) => (
+                          <span className="fac-card__feature-tag" key={j}>
+                            {f}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </div>
-          ))}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </section>
   );

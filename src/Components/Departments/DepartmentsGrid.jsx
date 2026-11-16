@@ -1,6 +1,7 @@
-import { FaHeartbeat, FaUserMd, FaUsers, FaBaby, FaBrain, FaFemale, FaArrowRight } from 'react-icons/fa';
+import { FaHeartbeat, FaUserMd, FaUsers, FaBaby, FaBrain, FaFemale, FaArrowRight, FaUniversity } from 'react-icons/fa';
+import { getDepartmentIcon } from '../../utils/departmentIcons';
 
-const DEPARTMENTS = [
+const DEFAULT_DEPARTMENTS = [
   { id: 'fundamentals', label: 'Fundamentals of Nursing',    icon: FaHeartbeat, color: '#4b2e83' },
   { id: 'adult-health', label: 'Adult Health Nursing',        icon: FaUserMd,    color: '#0f8ca6' },
   { id: 'community',    label: 'Community Health Nursing',    icon: FaUsers,     color: '#0f7a5a' },
@@ -9,10 +10,19 @@ const DEPARTMENTS = [
   { id: 'midwifery',    label: 'Midwifery & OBG Nursing',     icon: FaFemale,    color: '#b5456a' },
 ];
 
-export default function DepartmentsGrid() {
+export default function DepartmentsGrid({ departments = [] }) {
   const scrollTo = (id) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
+
+  const list = (departments && departments.length > 0)
+    ? departments.map(d => ({
+        id: d.deptId || d.id,
+        label: d.title || d.label,
+        icon: getDepartmentIcon(d.icon, FaUniversity),
+        color: d.color || '#4b2e83'
+      }))
+    : DEFAULT_DEPARTMENTS;
 
   return (
     <section id="depart-list" className="depart-grid-section">
@@ -27,7 +37,7 @@ export default function DepartmentsGrid() {
         </div>
 
         <div className="depart-grid-cards">
-          {DEPARTMENTS.map(({ id, label, icon: Icon, color }, i) => (
+          {list.map(({ id, label, icon: Icon, color }, i) => (
             <button
               key={id}
               className="depart-grid-tile"
@@ -35,7 +45,7 @@ export default function DepartmentsGrid() {
               onClick={() => scrollTo(id)}
             >
               <span className="depart-grid-tile-num">0{i + 1}</span>
-              <span className="depart-grid-tile-icon-wrap"><Icon /></span>
+              <span className="depart-grid-tile-icon-wrap">{Icon && <Icon />}</span>
               <span className="depart-grid-tile-label">{label}</span>
               <span className="depart-grid-tile-arrow"><FaArrowRight /></span>
             </button>

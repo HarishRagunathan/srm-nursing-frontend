@@ -30,7 +30,10 @@ const ContactDepartments = () => {
   useEffect(() => {
     const fetchDepts = async () => {
       try {
-        const res = await fetch(`${API_URL}/api/department?status=active`);
+        let res = await fetch(`${API_URL}/api/enquiry-departments?status=active`);
+        if (!res.ok) {
+          res = await fetch(`${API_URL}/api/department?status=active`);
+        }
         if (res.ok) {
           const json = await res.json();
           if (json && json.departments && json.departments.length > 0) {
