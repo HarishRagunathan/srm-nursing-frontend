@@ -1,9 +1,9 @@
 import { FaRegBuilding } from 'react-icons/fa';
 import Img from '../../assets/images/CodeOfConduct/COCForPrincipal/1.jpeg';
-import sections from './conductContent.json';
+
 import RuleCard from './RuleCard';
 
-export default function Principal() {
+export default function Principal({ sections }) {
   const data = sections.find(s => s.id === 'principal');
 
   return (
@@ -18,7 +18,7 @@ export default function Principal() {
           />
           <div className="coc-hero__content">
             <div className="section-chip white"><FaRegBuilding style={{ fontSize: 12 }}/> Principal</div>
-            <h2 className="coc-hero__title">Code of Conduct<br/><span>for the Principal</span></h2>
+            <h2 className="coc-hero__title">{data.title}</h2>
             <p className="coc-hero__subtitle">{data.intro}</p>
           </div>
         </div>

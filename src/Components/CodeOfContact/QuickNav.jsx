@@ -11,7 +11,7 @@ const tabs = [
   { icon: <FaTools />,              label: 'Support Staff',         href: '#support' },
 ];
 
-export default function QuickNav() {
+export default function QuickNav({ sections = [] }) {
   return (
     <div style={{
       background: 'white',
@@ -23,7 +23,7 @@ export default function QuickNav() {
     }}>
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 clamp(16px, 4vw, 44px)' }}>
         <div className="quicknav-scroll">
-          {tabs.map((t, i) => (
+          {tabs.filter(tab => sections.some(section => '#' + section.id === tab.href)).map((t, i) => (
             <a
               key={i}
               href={t.href}

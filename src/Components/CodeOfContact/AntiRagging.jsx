@@ -1,9 +1,9 @@
 import { FaBan } from 'react-icons/fa';
 import Img from '../../assets/images/CodeOfConduct/Anti-Raging/1.png';
-import sections from './conductContent.json';
+
 import RuleCard from './RuleCard';
 
-export default function AntiRagging() {
+export default function AntiRagging({ sections }) {
   const data = sections.find(s => s.id === 'ragging');
 
   return (
@@ -26,12 +26,10 @@ export default function AntiRagging() {
         {/* Uniform 2-Column Rules Grid (Numbered properly 1 to 6) */}
         <div className="coc-rules-grid">
           {data.rules.map(rule => {
-            let fullText;
-            if (rule.punishments) {
-              fullText = rule.punishments.map(p => p.text).join('; ') + '.';
-            } else if (rule.subAppeals) {
-              fullText = rule.subAppeals.map(a => a.replace(/^\d+\.\s*/, '')).join('; ') + '.';
-            }
+            const fullText = [
+              ...(rule.punishments || []).map(p => p.text),
+              ...(rule.subAppeals || []),
+            ].join('; ');
 
             return (
               <RuleCard

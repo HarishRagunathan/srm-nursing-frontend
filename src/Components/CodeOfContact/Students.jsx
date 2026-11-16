@@ -1,9 +1,9 @@
 import { FaUserGraduate } from 'react-icons/fa';
 import Img1 from '../../assets/images/CodeOfConduct/Student/1.JPG';
-import sections from './conductContent.json';
+
 import RuleCard from './RuleCard';
 
-export default function Students() {
+export default function Students({ sections }) {
   const data = sections.find(s => s.id === 'students');
 
   return (
@@ -18,12 +18,13 @@ export default function Students() {
           />
           <div className="coc-hero__content">
             <div className="section-chip white"><FaUserGraduate style={{ fontSize: 12 }}/> Students</div>
-            <h2 className="coc-hero__title">{data.institutionHeader}</h2>
+            <h2 className="coc-hero__title">{data.title}</h2>
             <p className="coc-hero__subtitle">{data.intro}</p>
           </div>
         </div>
 
         {/* Uniform 2-Column Rules Grid (1 to 15) */}
+        {data.institutionHeader && <p className="coc-inst-name">{data.institutionHeader}</p>}
         <div className="coc-rules-grid">
           {data.rules.map(rule => {
             const fullText = rule.subClauses ? rule.subClauses.join(' ') : undefined;

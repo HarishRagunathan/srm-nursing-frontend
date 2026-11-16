@@ -1,9 +1,9 @@
 import { FaHome } from 'react-icons/fa';
 import Img from '../../assets/images/CodeOfConduct/Hostel/1.JPG';
-import sections from './conductContent.json';
+
 import RuleCard from './RuleCard';
 
-export default function Hostel() {
+export default function Hostel({ sections }) {
   const data = sections.find(s => s.id === 'hostel');
 
   return (
@@ -20,7 +20,7 @@ export default function Hostel() {
           <div className="coc-hero__content">
             <div className="section-chip white"><FaHome style={{ fontSize: 12 }}/> Hostel</div>
             <h2 className="coc-hero__title">{data.title}</h2>
-            <p className="coc-hero__subtitle">All residents must adhere to the following hostel regulations for a safe, disciplined, and comfortable stay.</p>
+            <p className="coc-hero__subtitle">{data.intro}</p>
           </div>
         </div>
 

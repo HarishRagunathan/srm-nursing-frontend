@@ -1,8 +1,8 @@
 import { FaShieldAlt } from 'react-icons/fa';
 import CampusImg from '../../assets/images/Home/Slider/1.JPG';
-import sections from './conductContent.json';
 
-export default function DisciplinaryCommittee() {
+
+export default function DisciplinaryCommittee({ sections }) {
   const general   = sections.find(s => s.id === 'general-rules');
   const committee = sections.find(s => s.id === 'disciplinary-committee');
 
@@ -27,10 +27,8 @@ export default function DisciplinaryCommittee() {
           />
           <div className="coc-hero__content">
             <div className="section-chip white"><FaShieldAlt style={{ fontSize: 12 }}/> Disciplinary Committee</div>
-            <h2 className="coc-hero__title">
-              DISCIPLINARY COMMITTEE <span>MEMBERS</span>
-            </h2>
-            <p className="coc-hero__subtitle">{general.paragraphs[0]}</p>
+            <h2 className="coc-hero__title">{committee.title}</h2>
+            <p className="coc-hero__subtitle">{general.paragraphs.join(' ')}</p>
           </div>
         </div>
 
@@ -40,6 +38,8 @@ export default function DisciplinaryCommittee() {
           <div className="coc-inst-address">{general.address}</div>
         </div>
 
+        <h3>{general.title}</h3>
+        <p>{committee.subtitle}</p>
         {/* Committee Members Table */}
         <div className="coc-table-wrap">
           <table className="coc-table">

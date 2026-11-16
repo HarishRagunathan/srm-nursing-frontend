@@ -2,10 +2,10 @@ import { FaTshirt, FaMale, FaFemale } from 'react-icons/fa';
 import Img1 from '../../assets/images/CodeOfConduct/DressCode/1.JPG';
 import Img2 from '../../assets/images/CodeOfConduct/DressCode/2.png';
 import Img3 from '../../assets/images/CodeOfConduct/DressCode/3.JPG';
-import sections from './conductContent.json';
+
 import RuleCard from './RuleCard';
 
-export default function DressCode() {
+export default function DressCode({ sections }) {
   const data = sections.find(s => s.id === 'dress');
 
   return (
@@ -20,7 +20,7 @@ export default function DressCode() {
           />
           <div className="coc-hero__content">
             <div className="section-chip white"><FaTshirt style={{ fontSize: 12 }}/> Dress Code</div>
-            <h2 className="coc-hero__title">Dress Code <span>Guidelines</span></h2>
+            <h2 className="coc-hero__title">{data.title}</h2>
             <p className="coc-hero__subtitle">{data.intro}</p>
           </div>
         </div>
@@ -35,7 +35,7 @@ export default function DressCode() {
                 style={{ background: 'linear-gradient(to bottom, transparent 30%, rgba(47,27,92,0.88) 100%)' }}/>
               <div className="coc-gender-card__label">
                 <div className="coc-gender-card__icon"><FaMale/></div>
-                <span>Boys Uniform (Rules 1–6)</span>
+                <span>Boys Uniform ({data.boys.length} rules)</span>
               </div>
             </div>
             <div className="coc-gender-card__rules">
@@ -53,7 +53,7 @@ export default function DressCode() {
                 style={{ background: 'linear-gradient(to bottom, transparent 30%, rgba(15,140,166,0.85) 100%)' }}/>
               <div className="coc-gender-card__label">
                 <div className="coc-gender-card__icon"><FaFemale/></div>
-                <span>Girls Uniform (Rules 1–9)</span>
+                <span>Girls Uniform ({data.girls.length} rules)</span>
               </div>
             </div>
             <div className="coc-gender-card__rules">

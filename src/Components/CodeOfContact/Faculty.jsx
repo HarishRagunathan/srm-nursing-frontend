@@ -1,9 +1,9 @@
 import { FaChalkboardTeacher } from 'react-icons/fa';
 import Img1 from '../../assets/images/CodeOfConduct/COCForFaculty/1.JPG';
-import sections from './conductContent.json';
+
 import RuleCard from './RuleCard';
 
-export default function Faculty() {
+export default function Faculty({ sections }) {
   const data = sections.find(s => s.id === 'faculty');
 
   return (
@@ -18,8 +18,8 @@ export default function Faculty() {
           />
           <div className="coc-hero__content">
             <div className="section-chip white"><FaChalkboardTeacher style={{ fontSize: 12 }}/> Faculty</div>
-            <h2 className="coc-hero__title">Code of Conduct for<br/><span>Faculty Members</span></h2>
-            <p className="coc-hero__subtitle">{data.rules[0].text}</p>
+            <h2 className="coc-hero__title">{data.title}</h2>
+            <p className="coc-hero__subtitle">{data.intro || data.rules[0]?.text}</p>
           </div>
         </div>
 

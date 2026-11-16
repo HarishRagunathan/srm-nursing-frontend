@@ -1,9 +1,9 @@
 import { FaTools } from 'react-icons/fa';
 import Img1 from '../../assets/images/CodeOfConduct/COCForSupportStaffs/1.JPG';
-import sections from './conductContent.json';
+
 import RuleCard from './RuleCard';
 
-export default function SupportStaff() {
+export default function SupportStaff({ sections }) {
   const data = sections.find(s => s.id === 'support');
 
   return (
@@ -18,7 +18,7 @@ export default function SupportStaff() {
           />
           <div className="coc-hero__content">
             <div className="section-chip white"><FaTools style={{ fontSize: 12 }}/> Support Staff</div>
-            <h2 className="coc-hero__title">Code of Conduct for<br/><span>Support Staff</span></h2>
+            <h2 className="coc-hero__title">{data.title}</h2>
             <p className="coc-hero__subtitle">{data.intro}</p>
           </div>
         </div>
