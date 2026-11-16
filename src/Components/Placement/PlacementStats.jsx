@@ -1,33 +1,10 @@
 import { FiUsers, FiGlobe, FiHome, FiTrendingUp } from 'react-icons/fi';
 
-const stats = [
-  {
-    icon: <FiUsers />,
-    number: '208',
-    suffix: '+',
-    label: 'Total Students Placed',
-  },
-  {
-    icon: <FiHome />,
-    number: '40',
-    suffix: '+',
-    label: 'Hospital Partners',
-  },
-  {
-    icon: <FiGlobe />,
-    number: '3',
-    suffix: '',
-    label: 'Countries (International)',
-  },
-  {
-    icon: <FiTrendingUp />,
-    number: '100',
-    suffix: '%',
-    label: 'Placement Success Rate',
-  },
-];
 
-export default function PlacementStats() {
+
+const icons = { FiUsers, FiGlobe, FiHome, FiTrendingUp };
+
+export default function PlacementStats({ stats = [] }) {
   return (
     <section className="placement-stats">
       <div className="placement-stats__bg" aria-hidden="true" />
@@ -45,7 +22,7 @@ export default function PlacementStats() {
         <div className="placement-stats__grid">
           {stats.map((s, i) => (
             <div className="placement-stat-card" key={i}>
-              <div className="placement-stat-card__icon">{s.icon}</div>
+              <div className="placement-stat-card__icon">{(() => { const Icon = icons[s.icon] || FiUsers; return <Icon />; })()}</div>
               <div className="placement-stat-card__number">
                 {s.number}<span>{s.suffix}</span>
               </div>

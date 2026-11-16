@@ -1,46 +1,11 @@
-import { FiSend, FiMapPin, FiHeart, FiBriefcase, FiAward, FiCheckCircle } from 'react-icons/fi';
+import { FiSend, FiMapPin, FiCheckCircle } from 'react-icons/fi';
 import { FaGlobeAmericas, FaHospital, FaUserGraduate } from "react-icons/fa";
 
-const internationalPlacements = [
-  {
-    initials: 'PM',
-    name: 'Ms. Pastinal M',
-    role: 'Nursing Specialist',
-    hospital: 'Al Baraya Hospital',
-    location: 'Abha, Saudi Arabia',
-    country: 'Saudi Arabia',
-    flag: '🇸🇦',
-    program: 'B.Sc Nursing Alumni',
-  },
-  {
-    initials: 'AS',
-    name: 'Ms. Ananthi S',
-    role: 'Nursing Specialist',
-    hospital: 'Dr. Erfan & Bagedo Hospital',
-    location: 'Jeddah, Saudi Arabia',
-    country: 'Saudi Arabia',
-    flag: '🇸🇦',
-    program: 'B.Sc Nursing Alumni',
-  },
-  {
-    initials: 'NK',
-    name: 'Ms. Nisha K',
-    role: 'Nursing Specialist',
-    hospital: 'Asthar Sanad Hospital',
-    location: 'Riyadh, Saudi Arabia',
-    country: 'Saudi Arabia',
-    flag: '🇸🇦',
-    program: 'B.Sc Nursing Alumni',
-  },
-];
 
-const destinations = [
-  { label: '🇸🇦 Saudi Arabia', count: '3 Placed' },
-  { label: '🇦🇪 UAE', count: 'Upcoming' },
-  { label: '🇬🇧 UK', count: 'In Progress' },
-];
 
-export default function PlacementInternational() {
+
+
+export default function PlacementInternational({ internationalPlacements = [], destinations = [] }) {
   return (
     <section className="placement-international">
       <div className="placement-international__container">
