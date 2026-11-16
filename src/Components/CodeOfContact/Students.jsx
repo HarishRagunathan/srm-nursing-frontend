@@ -24,7 +24,6 @@ export default function Students({ sections }) {
         </div>
 
         {/* Uniform 2-Column Rules Grid (1 to 15) */}
-        {data.institutionHeader && <p className="coc-inst-name">{data.institutionHeader}</p>}
         <div className="coc-rules-grid">
           {data.rules.map(rule => {
             const fullText = rule.subClauses ? rule.subClauses.join(' ') : undefined;

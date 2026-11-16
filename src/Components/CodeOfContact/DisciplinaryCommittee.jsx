@@ -32,14 +32,6 @@ export default function DisciplinaryCommittee({ sections }) {
           </div>
         </div>
 
-        {/* Institutional Header */}
-        <div className="coc-inst-header">
-          <div className="coc-inst-name">{general.institution}</div>
-          <div className="coc-inst-address">{general.address}</div>
-        </div>
-
-        <h3>{general.title}</h3>
-        <p>{committee.subtitle}</p>
         {/* Committee Members Table */}
         <div className="coc-table-wrap">
           <table className="coc-table">
